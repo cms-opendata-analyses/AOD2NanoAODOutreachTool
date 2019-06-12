@@ -8,8 +8,15 @@ The tool can be used to read events from CMS AOD files and convert them to a red
 
 ## Setup CMSSW
 
+In case CMSSW is set up outside of the [CMS Open Data VM](http://opendata.cern.ch/record/252), source the following script.
+
 ```bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
+```
+
+And check-out the appropriate CMSSW release using following call.
+
+```bash
 cmsrel CMSSW_5_3_32
 ```
 
@@ -20,7 +27,7 @@ cd CMSSW_5_3_32/src
 cmsenv
 mkdir workspace
 cd workspace
-git clone <THIS REPOSITORY>
+git clone https://github.com/cms-opendata-analyses/AOD2NanoAODOutreachTool -b 2012 AOD2NanoAOD
 cd AOD2NanoAOD
 scram b -j8
 ```
@@ -32,13 +39,15 @@ cmsRun configs/simulation_cfg.py
 cmsRun configs/data_cfg.py
 ```
 
-## Create jobs for lxplus batch system
+## Example scripts for batch system submission
+
+You can use the following script to submit to any [HTCondor](https://research.cs.wisc.edu/htcondor/) batch system.
 
 ```bash
 ./submit_jobs.sh /path/to/job/directory
 ```
 
-## Merge job files
+You can merge the job files with the following script.
 
 ```bash
 ./merge_jobs.py /path/to/job/outputs
