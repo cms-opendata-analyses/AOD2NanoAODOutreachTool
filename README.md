@@ -8,6 +8,12 @@ The tool can be used to read events from CMS AOD files and convert them to a red
 
 ## Setup CMSSW
 
+KLP: In case running on lxplus, set first the slc6 environment (see [instructions](http://cms-sw.github.io/singularity.html))
+
+```bash
+cmssw-slc6
+```
+
 In case CMSSW is set up outside of the [CMS Open Data VM](http://opendata.cern.ch/record/252), source the following script.
 
 ```bash
