@@ -3,7 +3,7 @@ import FWCore.Utilities.FileUtils as FileUtils
 process = cms.Process("AOD2NanoAOD")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = "WARNING"
@@ -23,7 +23,8 @@ process.source = cms.Source(
     "PoolSource", fileNames=cms.untracked.vstring(*files))
 
 # Set global tag
-process.GlobalTag.globaltag = "START53_V27::All"
+# We don't have set the global tag for the educational samples. This simplifies running the code since we don't have to access the database.
+#process.GlobalTag.globaltag = "START53_V27::All"
 
 # Number of events to be skipped (0 by default)
 process.source.skipEvents = cms.untracked.uint32(0)
