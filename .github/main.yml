@@ -1,0 +1,31 @@
+on: [push,pull_request]
+
+jobs:
+  test_workflow:
+    runs-on: ubuntu-latest
+    name: AOD2NanoAOD test
+    steps:
+      # chmod of the script before getting to the container
+      - name: Prepare
+        run: |
+          pwd
+          ls -l
+          # (could use checkout action)
+          git clone https://github.com/katilp/AOD2NanoAODOutreachTool workdir
+          cd workdir
+          chmod +x commands.sh
+          ls -l
+      # run the container with the script in the repository
+      - name: Going to a container
+        id: container
+        run: | 
+          pwd
+          ls -l 
+          docker run -v $(pwd):/mountedvolume -w /home/cmsusr gitlab-registry.cern.ch/clange/cmssw-docker/cmssw_5_3_32 /bin/bash /mountedvolume/workdir/commands.sh
+
+      # upload output file
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: output
+          path: outputs/
