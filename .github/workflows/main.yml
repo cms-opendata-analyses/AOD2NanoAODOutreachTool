@@ -10,7 +10,7 @@ jobs:
         run: |
           pwd
           ls -l
-          # (could use checkout action)
+          # could use checkout action
           git clone https://github.com/katilp/AOD2NanoAODOutreachTool workdir
           cd workdir
           chmod +x commands.sh
