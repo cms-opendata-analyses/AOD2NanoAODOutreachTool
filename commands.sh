@@ -2,7 +2,8 @@
 
 mkdir workspace
 cd workspace
-git clone git://github.com/katilp/AOD2NanoAODOutreachTool -b v1.2 AOD2NanoAOD
+# this is already cloned in the previous step and could be passed in the mounted volume
+git clone git://github.com/katilp/AOD2NanoAODOutreachTool  AOD2NanoAOD
 cd AOD2NanoAOD
 scram b -j8
 
