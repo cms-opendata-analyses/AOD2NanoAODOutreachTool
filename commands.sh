@@ -14,6 +14,6 @@ ls -l
 sudo chown -R cmsusr /mountedvolume
 chmod 755 /mountedvolume
 mkdir /mountedvolume/outputs
-#cp *.pdf /mountedvolume/outputs
+#cp *.pdf /mountedvolume/outputs 
 ls -l /mountedvolume/outputs
 touch /mountedvolume/outputs/empty.out
