@@ -175,6 +175,18 @@ private:
   bool value_el_pfid[max_el];
   int value_el_genpartidx[max_el];
   int value_el_jetidx[max_el];
+  //added for cut based id
+  float value_el_sigIetaIeta[max_el];
+  float value_el_hOverEm[max_el];
+  float value_el_fbrem[max_el];
+  float value_el_eOverP[max_el];
+  float value_el_dEtaIn[max_el]; 
+  float value_el_dPhiIn[max_el];
+  float value_el_ecalE[max_el];
+  float value_el_pIn[max_el];
+  float value_el_dr03TkSumPt[max_el];
+  float value_el_dr03EcalRecHitSumEt[max_el];
+  float value_el_dr03HcalTowerSumEt[max_el];
 
   // Taus
   const static int max_tau = 1000;
@@ -301,6 +313,19 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Electron_pfId", value_el_pfid, "Electron_pfId[nElectron]/O");
   tree->Branch("Electron_jetIdx", value_el_jetidx, "Electron_jetIdx[nElectron]/I");
   tree->Branch("Electron_genPartIdx", value_el_genpartidx, "Electron_genPartIdx[nElectron]/I");
+  //Added for cut based id
+  tree->Branch("Electron_sigmaIEtaIEta", value_el_sigIetaIeta, "Electron_sigmaIEtaIEta[nElectron]/F");
+  tree->Branch("Electron_hOverEm", value_el_hOverEm, "Electron_hOverEm[nElectron]/F");
+  tree->Branch("Electron_fbrem", value_el_fbrem, "Electron_fbrem[nElectron]/F");
+  tree->Branch("Electron_eOverP", value_el_eOverP, "Electron_eOverP[nElectron]/F");
+  tree->Branch("Electron_dEtaIn", value_el_dEtaIn, "Electron_dEtaIn[nElectron]/F");
+  tree->Branch("Electron_dPhiIn", value_el_dPhiIn, "Electron_dPhiIn[nElectron]/F");
+  tree->Branch("Electron_ecalEnergy", value_el_ecalE, "Electron_ecalEnergy[nElectron]/F");
+  tree->Branch("Electron_pIn", value_el_pIn, "Electron_pIn[nElectron]/F");
+  tree->Branch("Electron_dr03TkSumPt", value_el_dr03TkSumPt, "Electron_dr03TkSumPt[nElectron]/F");
+  tree->Branch("Electron_dr03EcalRecHitSumEt", value_el_dr03EcalRecHitSumEt, "Electron_dr03EcalRecHitSumEt[nElectron]/F");
+  tree->Branch("Electron_dr03HcalTowerSumEt", value_el_dr03HcalTowerSumEt, "Electron_sr03HcalTowerSumEt[nElectron]/F");
+
 
   // Taus
   tree->Branch("nTau", &value_tau_n, "nTau/i");
@@ -483,6 +508,18 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_mass[value_el_n] = it->mass();
       value_el_cutbasedid[value_el_n] = it->passingCutBasedPreselection();
       value_el_pfid[value_el_n] = it->passingPflowPreselection();
+      //added for cut based id
+      value_el_sigIetaIeta = it->SigmaIetaIeta();
+      value_el_hOverEm = it->hadronicOverEm();
+      value_el_fbrem = it->fbrem();
+      value_el_eOverP = it->eSuperClusterOverP();
+      value_el_dEtaIn = it->deltaEtaSuperClusterTrackAtVtx();
+      value_el_dPhiIn = it->deltaPhiSuperClusterTrackAtVtx();
+      value_el_ecalE = it->ecalEnergy();
+      value_el_pIn = it->trackMomentumAtVtx().p();
+      value_el_dr03TkSumPt = it->dr03TkSumPt();
+      value_el_dr03EcalRecHitsSumEt = it->dr03EcalRecHitsSumEt();
+      value_el_dr03HcalTowerSumEt = it->dr03HcalTowerSumEt();
       if (it->passingPflowPreselection()) {
         auto iso03 = it->pfIsolationVariables();
         value_el_pfreliso03all[value_el_n] =
