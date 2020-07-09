@@ -213,7 +213,7 @@ private:
   bool value_tau_idantimumedium[max_tau];
   bool value_tau_idantimutight[max_tau];
 
-  /*
+  
   // Photons
   const static int max_ph = 1000;
   UInt_t value_ph_n;
@@ -225,7 +225,13 @@ private:
   float value_ph_pfreliso03all[max_ph];
   int value_ph_genpartidx[max_ph];
   int value_ph_jetidx[max_ph];
-  */
+  //Added for cut based id
+  //bool value_ph_passelectronveto[max_ph];
+  float value_ph_hOverEm[max_ph];
+  float value_ph_sigIetaIeta[max_ph];
+  float value_ph_chargedHadronIso[max_ph];
+  float value_ph_neutralHadronIso[max_ph];
+  float value_ph_photonIso[max_ph];
 
   // MET
   float value_met_pt;
@@ -351,7 +357,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Tau_idAntiMuMedium", value_tau_idantimumedium, "Tau_idAntiMuMedium[nTau]/O");
   tree->Branch("Tau_idAntiMuTight", value_tau_idantimutight, "Tau_idAntiMuTight[nTau]/O");
 
-  /*
+  
   // Photons
   tree->Branch("nPhoton", &value_ph_n, "nPhoton/i");
   tree->Branch("Photon_pt", value_ph_pt, "Photon_pt[nPhoton]/F");
@@ -362,7 +368,14 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Photon_pfRelIso03_all", value_ph_pfreliso03all, "Photon_pfRelIso03_all[nPhoton]/F");
   tree->Branch("Photon_jetIdx", value_ph_jetidx, "Photon_jetIdx[nPhoton]/I");
   tree->Branch("Photon_genPartIdx", value_ph_genpartidx, "Photon_genPartIdx[nPhoton]/I");
-  */
+  //Added for cut based id
+  //tree->Branch("Photon_passedelectronveto", value_ph_passelectronveto, "Photon_passedelectronveto[nPhoton]/B");
+  tree->Branch("Photon_hOverEm", value_ph_hOverEm, "Photon_hOverEm[nPhoton]/F");
+  tree->Branch("Photon_sigIetaIeta", value_ph_sigIetaIeta, "Photon_sigIetaIeta[nPhoton]/F");
+  tree->Branch("Photon_chargedHadronIso", value_ph_chargedHadronIso, "Photon_chargedHadronIso[nPhoton]/F");
+  tree->Branch("Photon_neutralHadronIso", value_ph_neutralHadronIso, "Photon_neutralHadronIso;nPhoton]/F");
+  tree->Branch("Photon_photonIso", value_ph_photonIso, "Photon_photonIso[nPhoton]/F");
+  
 
   // MET
   tree->Branch("MET_pt", &value_met_pt, "MET_pt/F");
@@ -480,7 +493,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
         value_mu_dxyErr[value_mu_n] = trk->d0Error();
         value_mu_dzErr[value_mu_n] = trk->dzError();
       } else {
-        value_mu_dxy[value_mu_n] = -999;
+       value_mu_dxy[value_mu_n] = -999;
         value_mu_dxyErr[value_mu_n] = -999;
         value_mu_dz[value_mu_n] = -999;
         value_mu_dzErr[value_mu_n] = -999;
@@ -509,17 +522,18 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_cutbasedid[value_el_n] = it->passingCutBasedPreselection();
       value_el_pfid[value_el_n] = it->passingPflowPreselection();
       //added for cut based id
-      value_el_sigIetaIeta = it->SigmaIetaIeta();
-      value_el_hOverEm = it->hadronicOverEm();
-      value_el_fbrem = it->fbrem();
-      value_el_eOverP = it->eSuperClusterOverP();
-      value_el_dEtaIn = it->deltaEtaSuperClusterTrackAtVtx();
-      value_el_dPhiIn = it->deltaPhiSuperClusterTrackAtVtx();
-      value_el_ecalE = it->ecalEnergy();
-      value_el_pIn = it->trackMomentumAtVtx().p();
-      value_el_dr03TkSumPt = it->dr03TkSumPt();
-      value_el_dr03EcalRecHitsSumEt = it->dr03EcalRecHitsSumEt();
-      value_el_dr03HcalTowerSumEt = it->dr03HcalTowerSumEt();
+      value_el_sigIetaIeta[value_el_n] = it->sigmaIetaIeta();
+      value_el_hOverEm[value_el_n] = it->hadronicOverEm();
+      value_el_fbrem[value_el_n] = it->fbrem();
+      value_el_eOverP[value_el_n] = it->eSuperClusterOverP();
+      value_el_dEtaIn[value_el_n] = it->deltaEtaSuperClusterTrackAtVtx();
+      value_el_dPhiIn[value_el_n] = it->deltaPhiSuperClusterTrackAtVtx();
+      value_el_ecalE[value_el_n] = it->ecalEnergy();
+      //value_el_pIn[value_el_n] = it->trackMomentumAtVtx().p(); //Does not compile: 'math::XYZVectorF' has no member named 'p'
+      value_el_pIn[value_el_n] = ( it->ecalEnergy() / it->eSuperClusterOverP() ); //same as above line according to twiki
+      value_el_dr03TkSumPt[value_el_n] = it->dr03TkSumPt();
+      value_el_dr03EcalRecHitSumEt[value_el_n] = it->dr03EcalRecHitSumEt();
+      value_el_dr03HcalTowerSumEt[value_el_n] = it->dr03HcalTowerSumEt();
       if (it->passingPflowPreselection()) {
         auto iso03 = it->pfIsolationVariables();
         value_el_pfreliso03all[value_el_n] =
@@ -612,7 +626,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
     }
   }
 
-  /*
+  
   // Photons
   Handle<PhotonCollection> photons;
   iEvent.getByLabel(InputTag("photons"), photons);
@@ -631,10 +645,17 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_ph_pfreliso03all[value_ph_n] = it->ecalRecHitSumEtConeDR03() / it->pt();
       value_ph_jetidx[value_ph_n] = -1;
       value_ph_genpartidx[value_ph_n] = -1;
+      //added for cut based id
+      //value_ph_passelectronveto[max_ph];
+      value_ph_hOverEm[value_ph_n] = it->hadTowOverEm();
+      value_ph_sigIetaIeta[value_ph_n] = it->sigmaIetaIeta();
+      value_ph_chargedHadronIso[value_ph_n] = it->chargedHadronIso();
+      value_ph_neutralHadronIso[value_ph_n] = it->neutralHadronIso();
+      value_ph_photonIso[value_ph_n] = it->photonIso();
       value_ph_n++;
     }
   }
-  */
+  
 
   // MET
   Handle<PFMETCollection> met;
@@ -690,11 +711,9 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       if (status == 1 && pdgId == 11) { // electron
         interestingGenParticles.emplace_back(*it);
       }
-      /*
       if (status == 1 && pdgId == 22) { // photon
         interestingGenParticles.emplace_back(*it);
       }
-      */
       if (status == 2 && pdgId == 15) { // tau
         interestingGenParticles.emplace_back(*it);
       }
@@ -742,7 +761,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_jetidx[p - selectedElectrons.begin()] = findBestMatch(selectedJets, p4);
     }
 
-   /*
    // Match photons with gen particles and jets
     for (auto p = selectedPhotons.begin(); p != selectedPhotons.end(); p++) {
       // Gen particle matching
@@ -763,7 +781,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       // Jet matching
       value_ph_jetidx[p - selectedPhotons.begin()] = findBestMatch(selectedJets, p4);
     }
-    */
 
     // Match taus with gen particles and jets
     for (auto p = selectedTaus.begin(); p != selectedTaus.end(); p++) {
