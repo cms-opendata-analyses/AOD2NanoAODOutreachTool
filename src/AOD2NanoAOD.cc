@@ -187,6 +187,7 @@ private:
   float value_el_dr03TkSumPt[max_el];
   float value_el_dr03EcalRecHitSumEt[max_el];
   float value_el_dr03HcalTowerSumEt[max_el];
+  int value_el_expectedHits[max_el];
 
   // Taus
   const static int max_tau = 1000;
@@ -331,7 +332,7 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Electron_dr03TkSumPt", value_el_dr03TkSumPt, "Electron_dr03TkSumPt[nElectron]/F");
   tree->Branch("Electron_dr03EcalRecHitSumEt", value_el_dr03EcalRecHitSumEt, "Electron_dr03EcalRecHitSumEt[nElectron]/F");
   tree->Branch("Electron_dr03HcalTowerSumEt", value_el_dr03HcalTowerSumEt, "Electron_sr03HcalTowerSumEt[nElectron]/F");
-
+  tree->Branch("Electron_trackerExpectedHits", value_el_expectedHits, "Electron_trackerExpectedHits[nElectron]/I");
 
   // Taus
   tree->Branch("nTau", &value_tau_n, "nTau/i");
@@ -534,6 +535,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_dr03TkSumPt[value_el_n] = it->dr03TkSumPt();
       value_el_dr03EcalRecHitSumEt[value_el_n] = it->dr03EcalRecHitSumEt();
       value_el_dr03HcalTowerSumEt[value_el_n] = it->dr03HcalTowerSumEt();
+      value_el_expectedHits[value_el_n] = it->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
       if (it->passingPflowPreselection()) {
         auto iso03 = it->pfIsolationVariables();
         value_el_pfreliso03all[value_el_n] =
