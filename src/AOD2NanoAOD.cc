@@ -201,6 +201,17 @@ private:
   bool value_tau_idantimumedium[max_tau];
   bool value_tau_idantimutight[max_tau];
 
+//added Tau IDs
+  float  value_tau_ByLooseCombinedIsolationDBSumPtCorr3Hits[max_tau];
+  float  value_tau_ByMediumCombinedIsolationDBSumPtCorr3Hits[max_tau];
+  float  value_tau_ByTightCombinedIsolationDBSumPtCorr3Hits[max_tau];
+  float  value_tau_ByLooseIsolationMVA[max_tau];
+  float  value_tau_ByMediumIsolationMVA[max_tau];
+  float  value_tau_ByTightIsolationMVA[max_tau];
+  float  value_tau_ByLooseMuonRejection[max_tau];
+  float  value_tau_ByMediumMuonRejection[max_tau];
+  float  value_tau_ByTightMuonRejection[max_tau];
+
   /*
   // Photons
   const static int max_ph = 1000;
@@ -325,7 +336,18 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Tau_idAntiMuLoose", value_tau_idantimuloose, "Tau_idAntiMuLoose[nTau]/O");
   tree->Branch("Tau_idAntiMuMedium", value_tau_idantimumedium, "Tau_idAntiMuMedium[nTau]/O");
   tree->Branch("Tau_idAntiMuTight", value_tau_idantimutight, "Tau_idAntiMuTight[nTau]/O");
+  
 
+  //added Tau IDs 
+  tree->Branch("Tau_ByLooseCombinedIsolationDBSumPtCorr3Hits",value_tau_ByLooseCombinedIsolationDBSumPtCorr3Hits, "Tau_ByLooseCombinedIsolationDBSumPtCorr3Hits[nTau]/F");
+  tree->Branch("Tau_ByMediumCombinedIsolationDBSumPtCorr3Hits",value_tau_ByMediumCombinedIsolationDBSumPtCorr3Hits, "Tau_ByMediumCombinedIsolationDBSumPtCorr3Hits[nTau]/F");
+  tree->Branch("Tau_ByTightCombinedIsolationDBSumPtCorr3Hits", value_tau_ByTightCombinedIsolationDBSumPtCorr3Hits, "Tau_ByTightCombinedIsolationDBSumPtCorr3Hits[nTau]/F");
+  tree->Branch("Tau_ByLooseIsolationMVA",value_tau_ByLooseIsolationMVA, "Tau_ByTightCombinedIsolationDBSumPtCorr3Hits[nTau]/F");
+  tree->Branch("Tau_ByMediumIsolationMVA",value_tau_ByMediumIsolationMVA, "Tau_ByMediumIsolationMVA[nTau]/F");
+  tree->Branch("Tau_ByTightIsolationMVA",value_tau_ByTightIsolationMVA, "Tau_ByTightIsolationMVA[nTau]/F");
+  tree->Branch("Tau_ByLooseMuonRejection",value_tau_ByLooseMuonRejection, "Tau_ByLooseMuonRejection[nTau]/F");
+  tree->Branch("Tau_ByMediumMuonRejection",value_tau_ByMediumMuonRejection, "Tau_ByMediumMuonRejection[nTau]/F");
+  tree->Branch("Tau_ByTightMuonRejection",value_tau_ByTightMuonRejection, "Tau_ByTightMuonRejection[nTau]/F");
   /*
   // Photons
   tree->Branch("nPhoton", &value_ph_n, "nPhoton/i");
