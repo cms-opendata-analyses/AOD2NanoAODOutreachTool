@@ -16,6 +16,8 @@ spec:
       command: [sh]
       source: |
         sudo chown $USER /mnt/vol
+        cd CMSSW_5_3_32/src
+        cmsenv
         mkdir workspace
         cd workspace
         git clone git://github.com/katilp/AOD2NanoAODOutreachTool  AOD2NanoAOD
