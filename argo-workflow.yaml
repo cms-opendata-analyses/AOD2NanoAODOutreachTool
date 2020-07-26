@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: nanoaod-argo-
+spec:
+  entrypoint: nanoaod-argo
+  volumes:
+    - name: workdir
+      hostPath:
+        path: /mnt/data
+        type: DirectoryOrCreate
+  templates:
+  - name: nanoaod-argo
+    script:
+      image: cmsopendata/cmssw_5_3_32 
+      command: [sh]
+      source: |
+        sudo chown $USER /mnt/vol
+        mkdir workspace
+        cd workspace
+        git clone git://github.com/katilp/AOD2NanoAODOutreachTool  AOD2NanoAOD
+        cd AOD2NanoAOD
+        scram b -j8
+        cmsRun configs/data_cfg.py
+        mv output.root /mnt/vol
+      volumeMounts:
+      - name: workdir
+        mountPath: /mnt/vol
