@@ -38,7 +38,7 @@ jobs:
         echo Check node with minikube ssh "ls -l /mnt/data" :
         minikube ssh "ls -l /mnt/data"
         mkdir outputs
-        echo Copy file with kubectl cp task-pv-pod:/mnt/data/test.txt test.txt :
+        echo Copy file with kubectl cp task-pv-pod:/mnt/data/output.root outputs/output.root :
         kubectl cp task-pv-pod:/mnt/data/output.root outputs/output.root
         echo ls -l :
         ls -l
