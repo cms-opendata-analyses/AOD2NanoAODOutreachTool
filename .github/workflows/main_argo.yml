@@ -28,7 +28,7 @@ jobs:
       run: |
         here=`pwd`
         export PATH="$here/bin:$PATH"
-        argo submit -n argo  --wait argo_workflow.yaml
+        argo submit -n argo  --wait argo-workflow.yaml
         argo get -n argo @latest
     - name: Check the output
       run: |
