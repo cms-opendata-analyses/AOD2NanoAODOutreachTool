@@ -16,6 +16,8 @@ spec:
       command: [sh]
       source: |
         sudo chown $USER /mnt/vol
+        source /opt/cms/entrypoint.sh
+        echo pwd `pwd`
         mkdir workspace
         cd workspace
         git clone git://github.com/katilp/AOD2NanoAODOutreachTool  AOD2NanoAOD
