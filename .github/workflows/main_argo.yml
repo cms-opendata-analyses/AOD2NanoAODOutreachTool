@@ -18,28 +18,18 @@ jobs:
         kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/quick-start-postgres.yaml
         curl -sLO https://github.com/argoproj/argo/releases/download/v2.10.0-rc3/argo-linux-amd64
         chmod +x argo-linux-amd64 
-        here=`pwd`
-        mkdir bin
-        export PATH="$here/bin:$PATH"
-        echo $PATH
-        mv ./argo-linux-amd64 bin/argo
+        mv ./argo-linux-amd64 $HOME/bin/argo
         argo version
     - name: Submit the argo test workflow
       run: |
-        here=`pwd`
-        export PATH="$here/bin:$PATH"
         argo submit -n argo  --wait argo-workflow.yaml
         argo get -n argo @latest
     - name: Check the output
       run: |
-        here=`pwd`
-        export PATH="$here/bin:$PATH"
         argo logs -n argo @latest
-        echo Check node with minikube ssh "ls -l /mnt/data" :
-        minikube ssh "ls -l /mnt/data"
         mkdir outputs
         echo Copy file with kubectl cp task-pv-pod:/mnt/data/output.root outputs/output.root :
-        kubectl cp task-pv-pod:/mnt/data/output.root outputs/output.root
+        kubectl cp task-pv-pod:/mnt/data/ outputs/
         echo ls -l :
         ls -l
     - name: Upload the ouput as a github artifact
