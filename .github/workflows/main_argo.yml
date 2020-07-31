@@ -28,7 +28,7 @@ jobs:
       run: |
         argo logs -n argo @latest
         mkdir outputs
-        echo Copy file with kubectl cp task-pv-pod:/mnt/data/output.root outputs/output.root :
+        echo Copy file with kubectl cp task-pv-pod:/mnt/data/ outputs/ :
         kubectl cp task-pv-pod:/mnt/data/ outputs/
         echo ls -l :
         ls -l
