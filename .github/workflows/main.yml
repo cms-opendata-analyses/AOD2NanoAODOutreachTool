@@ -6,23 +6,17 @@ jobs:
     name: AOD2NanoAOD test
     steps:
       # chmod of the script before getting to the container
+      - uses: actions/checkout@v2
       - name: Prepare
         run: |
-          pwd
-          ls -l
-          # could use checkout action
-          git clone https://github.com/katilp/AOD2NanoAODOutreachTool workdir
-          cd workdir
-          chmod +x commands.sh
-          ls -l
+          mkdir outputs
       # run the container with the script in the repository
       - name: Going to a container
         id: container
         run: | 
-          pwd
-          ls -l 
-          docker run -v $(pwd):/mountedvolume -w /home/cmsusr gitlab-registry.cern.ch/clange/cmssw-docker/cmssw_5_3_32 /bin/bash /mountedvolume/workdir/commands.sh
-
+          docker run -v $(pwd):/mnt/vol -w /home/cmsusr gitlab-registry.cern.ch/clange/cmssw-docker/cmssw_5_3_32 /bin/bash /mnt/vol/commands.sh
+          echo ls -l  `ls -l `
+          cp output.root outputs
       # upload output file
       - name: Upload artifact
         uses: actions/upload-artifact@v2
