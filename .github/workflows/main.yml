@@ -1,9 +1,12 @@
-on: [pull_request]
-
+name: Test workflow on plain docker
+on:
+  pull_request:
+    branches:
+    - master
 jobs:
   test_workflow:
     runs-on: ubuntu-latest
-    name: AOD2NanoAOD test
+    name: AOD2NanoAOD test - plain docker
     steps:
       # chmod of the script before getting to the container
       - uses: actions/checkout@v2
@@ -14,7 +17,7 @@ jobs:
       - name: Going to a container
         id: container
         run: | 
-          docker run -v $(pwd):/mnt/vol -w /home/cmsusr gitlab-registry.cern.ch/clange/cmssw-docker/cmssw_5_3_32 /bin/bash /mnt/vol/commands.sh
+          docker run -v $(pwd):/mnt/vol -w /home/cmsusr cmsopendata/cmssw_5_3_32 /bin/bash /mnt/vol/commands.sh 1000 data_cfg.py
           echo ls -l  `ls -l `
           cp output.root outputs
       # upload output file

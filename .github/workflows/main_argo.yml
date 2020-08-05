@@ -1,10 +1,12 @@
-name: CI
+name: Test workflow on minikube + argo 
 on:
-  - release
+  pull_request:
+    branches:
+    - master
 jobs:
   job1:
     runs-on: ubuntu-latest
-    name: argo workflow on minikube with output
+    name: AOD2NanoAOD test - minikube + argo
     steps:
     - uses: actions/checkout@v2
     - name: Start minikube
