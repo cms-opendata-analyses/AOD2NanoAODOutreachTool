@@ -59,4 +59,4 @@ This repository contains two [GitHub action](https://github.com/features/actions
 - The workflow in [main.yml](.github/workflows/main.yml) runs a test job in a docker container. The run commands are passed in [commands.sh](commands.sh).
 - The workflow in [main_argo.yml](.github/workflows/main_argo.yml) sets up a [minikube](https://minikube.sigs.k8s.io/docs/start/) environment and runs a workflow defined with [argo workflow](https://argoproj.github.io/argo/quick-start/) engine. The workflow definition and run commands are in [argo-workflow.yaml](argo-workflow.yaml).
 
-The ouput is returned as a github artifact. The workflows are triggered by a pull request.
+The ouput is returned as a GitHub artifact. The workflows are triggered by a pull request.
