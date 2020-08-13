@@ -53,7 +53,7 @@ You can merge the job files with the following script.
 ./merge_jobs.py /path/to/job/outputs
 ```
 
-## Test workflows
+## Test workflows 
 
 This repository contains two [GitHub action](https://github.com/features/actions) workflows, which run the test workflow on the CMS open data container using GitHub free resources.  
 - The workflow in [main.yml](.github/workflows/main.yml) runs a test job in a docker container. The run commands are passed in [commands.sh](commands.sh).
