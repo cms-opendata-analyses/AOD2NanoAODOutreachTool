@@ -8,7 +8,7 @@ The tool can be used to read events from CMS AOD files and convert them to a red
 
 ## Setup CMSSW
 
-In case CMSSW is set up outside of the [CMS Open Data VM](http://opendata.cern.ch/record/252), source the following script.
+In case CMSSW is set up outside of the [CMS Open Data VM](http://opendata.cern.ch/record/252) or of the [CMS Open Data docker container](http://opendata.cern.ch/docs/cms-guide-docker), source the following script.
 
 ```bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -52,3 +52,11 @@ You can merge the job files with the following script.
 ```bash
 ./merge_jobs.py /path/to/job/outputs
 ```
+
+## Test workflows
+
+This repository contains two [GitHub action](https://github.com/features/actions) workflows, which run the test workflow on the CMS open data container using GitHub free resources.  
+- The workflow in [main.yml](.github/workflows/main.yml) runs a test job in a docker container. The run commands are passed in [commands.sh](commands.sh).
+- The workflow in [main_argo.yml](.github/workflows/main_argo.yml) sets up a [minikube](https://minikube.sigs.k8s.io/docs/start/) environment and runs a workflow defined with [argo workflow](https://argoproj.github.io/argo/quick-start/) engine. The workflow definition and run commands are in [argo-workflow.yaml](argo-workflow.yaml).
+
+The output is returned as a GitHub artifact. The workflows are triggered by a pull request.

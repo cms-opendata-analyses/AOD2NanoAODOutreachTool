@@ -1,0 +1,41 @@
+name: Test workflow on minikube + argo 
+on:
+  pull_request:
+    branches:
+    - master
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    name: AOD2NanoAOD test - minikube + argo
+    steps:
+    - uses: actions/checkout@v2
+    - name: Start minikube
+      uses: medyagh/setup-minikube@master
+    - name: Set up persistent volume and storage pod
+      run: |
+        kubectl apply -f volumes.yaml   
+    - name: Set up argo
+      run: |
+        kubectl create ns argo
+        kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/quick-start-postgres.yaml
+        curl -sLO https://github.com/argoproj/argo/releases/download/v2.10.0-rc3/argo-linux-amd64
+        chmod +x argo-linux-amd64 
+        mv ./argo-linux-amd64 $HOME/bin/argo
+        argo version
+    - name: Submit the argo test workflow
+      run: |
+        argo submit -n argo  --wait argo-workflow.yaml
+        argo get -n argo @latest
+    - name: Check the output
+      run: |
+        argo logs -n argo @latest
+        mkdir outputs
+        echo Copy file with kubectl cp task-pv-pod:/mnt/data/ outputs/ :
+        kubectl cp task-pv-pod:/mnt/data/ outputs/
+        echo ls -l :
+        ls -l
+    - name: Upload the ouput as a github artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: output
+        path: outputs/ 

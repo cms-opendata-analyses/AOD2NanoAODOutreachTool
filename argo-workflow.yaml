@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: nanoaod-argo-
+spec:
+  entrypoint: nanoaod-argo
+  arguments:
+    parameters:
+    - name: nevents
+      value: 1000
+    - name: config
+      value: "data_cfg.py"
+  volumes:
+    - name: workdir
+      hostPath:
+        path: /mnt/data
+        type: DirectoryOrCreate
+
+  templates:
+  - name: nanoaod-argo
+    inputs:
+      parameters:
+      - name: nevents
+      - name: config
+    script:
+      image: cmsopendata/cmssw_5_3_32 
+      command: [sh]
+      source: |
+        source /opt/cms/entrypoint.sh
+        sudo chown $USER /mnt/vol
+        mkdir workspace
+        cd workspace
+        git clone git://github.com/cms-opendata-analyses/AOD2NanoAODOutreachTool  AOD2NanoAOD
+        cd AOD2NanoAOD
+        scram b -j8
+        eventline=$(grep maxEvents configs/{{inputs.parameters.config}})
+        sed -i "s/$eventline/process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32({{inputs.parameters.nevents}}) )/g" configs/{{inputs.parameters.config}}
+        cmsRun configs/{{inputs.parameters.config}}
+        cp output.root /mnt/vol/
+        echo  ls -l /mnt/vol
+        ls -l /mnt/vol
+      volumeMounts:
+      - name: workdir
+        mountPath: /mnt/vol
