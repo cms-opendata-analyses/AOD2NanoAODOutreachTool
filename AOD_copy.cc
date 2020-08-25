@@ -188,9 +188,6 @@ private:
   float value_el_dr03EcalRecHitSumEt[max_el];
   float value_el_dr03HcalTowerSumEt[max_el];
   int value_el_expectedHits[max_el];
-  bool value_el_isLoose[max_el];
-  bool value_el_isMedium[max_el];
-  bool value_el_isTight[max_el];
 
   // Taus
   const static int max_tau = 1000;
@@ -236,9 +233,6 @@ private:
   float value_ph_chargedHadronIso[max_ph];
   float value_ph_neutralHadronIso[max_ph];
   float value_ph_photonIso[max_ph];
-  bool value_ph_isLoose[max_ph];
-  bool value_ph_isMedium[max_ph];
-  bool value_ph_isTight[max_ph];
 
   // MET
   float value_met_pt;
@@ -337,9 +331,18 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Electron_jetIdx", value_el_jetidx, "Electron_jetIdx[nElectron]/I");
   tree->Branch("Electron_genPartIdx", value_el_genpartidx, "Electron_genPartIdx[nElectron]/I");
   //Added for cut based id
-  tree->Branch("Electron_isLoose", value_el_isLoose, "Electron_isLoose[nElectron]/O");
-  tree->Branch("Electron_isMedium", value_el_isMedium, "Electron_isMedium[nElectron]/O");
-  tree->Branch("Electron_isTight", value_el_isTight, "Electron_isTight[nElectron]/O");
+  tree->Branch("Electron_sigmaIEtaIEta", value_el_sigIetaIeta, "Electron_sigmaIEtaIEta[nElectron]/F");
+  tree->Branch("Electron_hOverEm", value_el_hOverEm, "Electron_hOverEm[nElectron]/F");
+  tree->Branch("Electron_fbrem", value_el_fbrem, "Electron_fbrem[nElectron]/F");
+  tree->Branch("Electron_eOverP", value_el_eOverP, "Electron_eOverP[nElectron]/F");
+  tree->Branch("Electron_dEtaIn", value_el_dEtaIn, "Electron_dEtaIn[nElectron]/F");
+  tree->Branch("Electron_dPhiIn", value_el_dPhiIn, "Electron_dPhiIn[nElectron]/F");
+  tree->Branch("Electron_ecalEnergy", value_el_ecalE, "Electron_ecalEnergy[nElectron]/F");
+  tree->Branch("Electron_pIn", value_el_pIn, "Electron_pIn[nElectron]/F");
+  tree->Branch("Electron_dr03TkSumPt", value_el_dr03TkSumPt, "Electron_dr03TkSumPt[nElectron]/F");
+  tree->Branch("Electron_dr03EcalRecHitSumEt", value_el_dr03EcalRecHitSumEt, "Electron_dr03EcalRecHitSumEt[nElectron]/F");
+  tree->Branch("Electron_dr03HcalTowerSumEt", value_el_dr03HcalTowerSumEt, "Electron_sr03HcalTowerSumEt[nElectron]/F");
+  tree->Branch("Electron_trackerExpectedHits", value_el_expectedHits, "Electron_trackerExpectedHits[nElectron]/I");
 
   // Taus
   tree->Branch("nTau", &value_tau_n, "nTau/i");
@@ -378,9 +381,12 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Photon_genPartIdx", value_ph_genpartidx, "Photon_genPartIdx[nPhoton]/I");
   //Added for cut based id
   //tree->Branch("Photon_passedelectronveto", value_ph_passelectronveto, "Photon_passedelectronveto[nPhoton]/B");
-  tree->Branch("Photon_isLoose", value_ph_isLoose, "Photon_isLoose[nPhoton]/O");
-  tree->Branch("Photon_isMedium", value_ph_isMedium, "Photon_isMedium[nPhoton]/O");
-  tree->Branch("Photon_isTight", value_ph_isTight, "Photon_isTight[nPhoton]/O");
+  tree->Branch("Photon_hOverEm", value_ph_hOverEm, "Photon_hOverEm[nPhoton]/F");
+  tree->Branch("Photon_sigIetaIeta", value_ph_sigIetaIeta, "Photon_sigIetaIeta[nPhoton]/F");
+  tree->Branch("Photon_chargedHadronIso", value_ph_chargedHadronIso, "Photon_chargedHadronIso[nPhoton]/F");
+  tree->Branch("Photon_neutralHadronIso", value_ph_neutralHadronIso, "Photon_neutralHadronIso;nPhoton]/F");
+  tree->Branch("Photon_photonIso", value_ph_photonIso, "Photon_photonIso[nPhoton]/F");
+  
 
   // MET
   tree->Branch("MET_pt", &value_met_pt, "MET_pt/F");
@@ -549,7 +555,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_dr03EcalRecHitSumEt[value_el_n] = it->dr03EcalRecHitSumEt();
       value_el_dr03HcalTowerSumEt[value_el_n] = it->dr03HcalTowerSumEt();
       value_el_expectedHits[value_el_n] = it->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-
+      if ( 
       if (it->passingPflowPreselection()) {
         auto iso03 = it->pfIsolationVariables();
         value_el_pfreliso03all[value_el_n] =
@@ -564,57 +570,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_dzErr[value_el_n] = trk->dzError();
       value_el_jetidx[value_el_n] = -1;
       value_el_genpartidx[value_el_n] = -1;
-      if ( abs(it->eta()) <= 1.479 ) {
-	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.01 &&
-             it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
-	  value_el_isTight[value_el_n] = true;
-	  value_el_isMedium[value_el_n] = false;
-	  value_el_isLoose[value_el_n] = false;
-	}
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.06 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = true;
-          value_el_isLoose[value_el_n] = false;
-        }
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
-	  value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = true;
-	}
-      }
-      else if ( abs(it->eta()) > 1.479 && abs(it->eta()) < 2.5 ) {
-        if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.02 && it->sigmaIetaIeta()<.03 &&
-             it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
-          value_el_isTight[value_el_n] = true;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = false;
-        }
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = true;
-          value_el_isLoose[value_el_n] = false;
-        }
-        else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.1 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.1 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = true;
-        }
-	else {
-	  value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = false;
-        }
-      }
       value_el_n++;
     }
   }
@@ -719,50 +674,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_ph_chargedHadronIso[value_ph_n] = it->chargedHadronIso();
       value_ph_neutralHadronIso[value_ph_n] = it->neutralHadronIso();
       value_ph_photonIso[value_ph_n] = it->photonIso();
-      if ( it->eta() <= 1.479 ){
-	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.011 && it->chargedHadronIso()<.7 && it->neutralHadronIso()<(.4+.04*it->pt())
-	     && it->photonIso()<(.5+.005*it->pt())) {
-	  value_ph_isTight[value_el_n] = true;
-	  value_ph_isMedium[value_el_n] = false;
-	  value_ph_isLoose[value_el_n] = false;
-	}	    
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.011 && it->chargedHadronIso()<1.5 && it->neutralHadronIso()<(1.0+.04*it->pt())
-		  && it->photonIso()<(.7+.005*it->pt())) {
-	  value_ph_isTight[value_el_n] = false;
-	  value_ph_isMedium[value_el_n] = true;
-	  value_ph_isLoose[value_el_n] = false;
-	}
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.012 && it->chargedHadronIso()<2.6 && it->neutralHadronIso()<(3.5+.04*it->pt())
-                  && it->photonIso()<(1.3+.005*it->pt())) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = true;
-	}
-      }
-      else if ( it->eta() > 1.479 && it->eta() < 2.5 ) {
-	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.031 && it->chargedHadronIso()<.5 && it->neutralHadronIso()<(1.5+.04*it->pt())
-             && it->photonIso()<(1.0+.005*it->pt())) {
-	  value_ph_isTight[value_el_n] = true;
-	  value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = false;
-        }
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.033 && it->chargedHadronIso()<1.2 && it->neutralHadronIso()<(1.5+.04*it->pt())
-                  && it->photonIso()<(1.0+.005*it->pt())) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = true;
-          value_ph_isLoose[value_el_n] = false;
-	}
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.034 && it->chargedHadronIso()<2.3 && it->neutralHadronIso()<(2.9+.04*it->pt())) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = true;
-	}
-      }
-      else {
-	value_ph_isTight[value_el_n] = false;
-	value_ph_isMedium[value_el_n] = false;
-	value_ph_isLoose[value_el_n] = false;
-      }
       value_ph_n++;
     }
   }
@@ -785,14 +696,14 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_8_TeV_data_a
   // B-tag recommendations:
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation53XReReco
-  Handle<PFJetCollection> jets;
-  iEvent.getByLabel(InputTag("ak5PFJets"), jets);
+  Handle<CaloJetCollection> jets;
+  iEvent.getByLabel(InputTag("ak5CaloJets"), jets);
   Handle<JetTagCollection> btags;
   iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
 
   const float jet_min_pt = 15;
   value_jet_n = 0;
-  std::vector<PFJet> selectedJets;
+  std::vector<CaloJet> selectedJets;
   for (auto it = jets->begin(); it != jets->end(); it++) {
     if (it->pt() > jet_min_pt) {
       selectedJets.emplace_back(*it);
@@ -800,21 +711,21 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_jet_eta[value_jet_n] = it->eta();
       value_jet_phi[value_jet_n] = it->phi();
       value_jet_mass[value_jet_n] = it->mass();
-      //value_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
+      value_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
       value_jet_btag[value_jet_n] = btags->operator[](it - jets->begin()).second;
       value_jet_n++;
     }
   }
 
   // Corrected Jets
-  Handle<PFJetCollection> corr_jets;
+  Handle<CaloJetCollection> corr_jets;
   iEvent.getByLabel(InputTag("corrected_jets"), corr_jets);
   //Handle<JetTagCollection> btags;
   //iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
 
   //const float jet_min_pt = 15;
   value_corr_jet_n = 0;
-  std::vector<PFJet> selectedCorrJets;
+  std::vector<CaloJet> selectedCorrJets;
   for (auto it = corr_jets->begin(); it != corr_jets->end(); it++) {
     if (it->pt() > jet_min_pt) {
       selectedCorrJets.emplace_back(*it);
@@ -822,7 +733,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_corr_jet_eta[value_jet_n] = it->eta();
       value_corr_jet_phi[value_jet_n] = it->phi();
       value_corr_jet_mass[value_jet_n] = it->mass();
-      //value_corr_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
+      value_corr_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
       value_corr_jet_btag[value_jet_n] = btags->operator[](it - jets->begin()).second;
       value_corr_jet_n++;
     }
