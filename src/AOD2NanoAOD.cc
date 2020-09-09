@@ -523,7 +523,12 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   // Electrons
   Handle<GsfElectronCollection> electrons;
   iEvent.getByLabel(InputTag("gsfElectrons"), electrons);
-
+  edm::Handle<reco::ConversionCollection> hConversions;
+  iEvent.getByLabel("allConversions", hConversions);
+  edm::Handle<reco::BeamSpot> bsHandle;
+  iEvent.getByLabel("offlineBeamSpot", bsHandle);
+  const reco::BeamSpot &beamspot = *bsHandle.product();
+  
   value_el_n = 0;
   const float el_min_pt = 5;
   std::vector<GsfElectron> selectedElectrons;
@@ -551,7 +556,8 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_dr03EcalRecHitSumEt[value_el_n] = it->dr03EcalRecHitSumEt();
       value_el_dr03HcalTowerSumEt[value_el_n] = it->dr03HcalTowerSumEt();
       value_el_expectedHits[value_el_n] = it->gsfTrack()->trackerExpectedHitsInner().numberOfHits();
-
+      int missing_hits = it->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-it->gsfTrack()->hitPattern().numberOfHits();
+      bool passelectronveto = !ConversionTools::hasMatchedConversion(*it, hConversions, beamspot.position());
       if (it->passingPflowPreselection()) {
         auto iso03 = it->pfIsolationVariables();
         value_el_pfreliso03all[value_el_n] =
@@ -559,6 +565,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       } else {
         value_el_pfreliso03all[value_el_n] = -999;
       }
+      float pfIso = value_el_pfreliso03all[value_el_n];
       auto trk = it->gsfTrack();
       value_el_dxy[value_el_n] = trk->dxy(pv);
       value_el_dz[value_el_n] = trk->dz(pv);
@@ -568,22 +575,22 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_genpartidx[value_el_n] = -1;
       if ( abs(it->eta()) <= 1.479 ) {
 	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.01 &&
-             it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+             it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=0 && pfIso<.10 &&
+             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
 	  value_el_isTight[value_el_n] = true;
 	  value_el_isMedium[value_el_n] = false;
 	  value_el_isLoose[value_el_n] = false;
 	}
 	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.06 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=1 &&  pfIso<.15 &&
+		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05  && passelectronveto==true) {
           value_el_isTight[value_el_n] = false;
           value_el_isMedium[value_el_n] = true;
           value_el_isLoose[value_el_n] = false;
         }
 	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && missing_hits<=1 &&  pfIso<.15 &&
+		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
 	  value_el_isTight[value_el_n] = false;
           value_el_isMedium[value_el_n] = false;
           value_el_isLoose[value_el_n] = true;
@@ -591,22 +598,22 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       }
       else if ( abs(it->eta()) > 1.479 && abs(it->eta()) < 2.5 ) {
         if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.02 && it->sigmaIetaIeta()<.03 &&
-             it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+             it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=0 && pfIso<.10 &&
+             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
           value_el_isTight[value_el_n] = true;
           value_el_isMedium[value_el_n] = false;
           value_el_isLoose[value_el_n] = false;
         }
 	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+                  it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=1 && pfIso<.15 &&
+                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
           value_el_isTight[value_el_n] = false;
           value_el_isMedium[value_el_n] = true;
           value_el_isLoose[value_el_n] = false;
         }
         else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.1 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.1 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+                  it->hadronicOverEm()<.1 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && missing_hits<=1 && pfIso<.15 &&
+                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
           value_el_isTight[value_el_n] = false;
           value_el_isMedium[value_el_n] = false;
           value_el_isLoose[value_el_n] = true;
@@ -697,11 +704,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 
   
   // Photons
-  edm::Handle<reco::BeamSpot> bsHandle;
-  iEvent.getByLabel("offlineBeamSpot", bsHandle);
-  const reco::BeamSpot &beamspot = *bsHandle.product();
-  edm::Handle<reco::ConversionCollection> hConversions;
-  iEvent.getByLabel("allConversions", hConversions);
   Handle<PhotonCollection> photons;
   iEvent.getByLabel(InputTag("photons"), photons);
   Handle<double> rhoHandle;
@@ -859,7 +861,7 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
 
   // Corrected Jets
   Handle<PFJetCollection> corr_jets;
-  iEvent.getByLabel(InputTag("corrected_jets"), corr_jets);
+  iEvent.getByLabel(InputTag("ak5PFCorrectedJetsSmeared"), corr_jets);
   //Handle<JetTagCollection> btags;
   //iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
 

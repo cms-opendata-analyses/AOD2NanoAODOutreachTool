@@ -1,5 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
+from RecoMET.METProducers.METSigParams_cfi import *
+import os 
+
+relBase = os.environ['CMSSW_BASE']
+
 process = cms.Process("AOD2NanoAOD")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -35,31 +40,56 @@ process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoJets.Configuration.RecoPFJets_cff')
 process.ak5PFJets.doAreaFastjet = True
 
-process.ak5PFchsCorrectedJets = cms.EDProducer('CorrectedPFJetProducer',
+process.ak5PFCorrectedJets = cms.EDProducer('PFJetCorrectionProducer',
         src = cms.InputTag("ak5PFJets"),
-        correctors  = cms.VInputTag('ak5PFCHSL1FastL2L3Corrector')
+        correctors  = cms.vstring('ak5PFL2L3')
         )
 
-process.ak5PFchsCorrectedJetsSmeared = cms.EDProducer('SmearedPFJetProducer',
-        src = cms.InputTag('ak5PFchsCorrectedJets'),
-        enabled = cms.bool(True),
-        rho = cms.InputTag("fixedGridRhoFastjetAll"),
-        algo = cms.string('AK5PFchs'),
-        algopt = cms.string('AK5PFchs_pt')
+process.ak5PFCorrectedJetsSmeared = cms.EDProducer('SmearedPFJetProducer',
+        src = cms.InputTag('ak5PFCorrectedJets'),
+        jetCorrLabel = cms.string("ak4PFL1FastL2L3Corrector"),
+        dRmaxGenJetMatch = cms.string('min(0.5, 0.1 + 0.3*exp(-0.05*(genJetPt - 10.)))'),
+        sigmaMaxGenJetMatch = cms.double(3.),
+        inputFileName = cms.FileInPath('PhysicsTools/PatUtils/data/pfJetResolutionMCtoDataCorrLUT.root'),
+        lutName = cms.string('pfJetResolutionMCtoDataCorrLUT'),
+        jetResolutions = METSignificance_params,
+        skipRawJetPtThreshold = cms.double(10.), # GeV
+        skipCorrJetPtThreshold = cms.double(1.e-2),
+        srcGenJets = cms.InputTag('ak5GenJets'),
+        shiftBy = cms.double(101.)
         )
 
+#process.ak5PFCorrectedJetsSmeared = cms.EDProducer('PATPFJetMETcorrInputProducer',
+#        src = cms.InputTag('ak5PFCorrectedJets'),
+#        offsetCorrLabel = cms.string('L1FastJet'),
+#        jetCorrLabel = cms.string("L3Absolute"),
+#        type1JetPtThreshold = cms.double(10.0),
+#        skipEM = cms.bool(True),
+#        skipEMfractionThreshold = cms.double(0.90),
+#        skipMuons = cms.bool(True),
+#        skipMuonSelection = cms.string("isGlobalMuon | isStandAloneMuon")
+#        )
 
 # Number of events to be skipped (0 by default)
 process.source.skipEvents = cms.untracked.uint32(0)
 
+## Output Module Configuration (expects a path 'p')
+process.out = cms.OutputModule("PoolOutputModule",
+        fileName = cms.untracked.string('jet_corr_name.root'),
+        #SelectEvents = cms.untracked.PSet( SelectEvents = cms.vstring('p') ),
+        outputCommands = cms.untracked.vstring('keep *')
+        )
+
 # Register fileservice for output file
 process.aod2nanoaod = cms.EDAnalyzer("AOD2NanoAOD", 
         plain_jets = cms.InputTag('slimmedJets'),
-        corrected_jets = cms.InputTag('ak5PFchsCorrectedJets'),
-        smeared_jets = cms.InputTag('ak5PFchsCorrectedJetsSmeared'), 
+        corrected_jets = cms.InputTag('ak5PFCorrectedJets'),
+        smeared_jets = cms.InputTag('ak5PFCorrectedJetsSmeared'), 
         isData = cms.bool(False)
         )
 process.TFileService = cms.Service(
     "TFileService", fileName=cms.string("output.root"))
 
-process.p = cms.Path(process.aod2nanoaod)
+#process.p = cms.Path(process.aod2nanoaod)
+process.p = cms.Path(process.ak5PFCorrectedJets * process.ak5PFCorrectedJetsSmeared)# * process.aod2nanoaod)
+process.ep = cms.EndPath(process.out)
