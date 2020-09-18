@@ -12,7 +12,7 @@ In case CMSSW is set up outside of the [CMS Open Data VM](http://opendata.cern.c
 
 ```bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-```
+``` 
 
 And check-out the appropriate CMSSW release using following call.
 
