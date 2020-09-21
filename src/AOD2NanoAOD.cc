@@ -61,6 +61,8 @@
 #include "FWCore/Common/interface/TriggerResultsByName.h"
 #include "FWCore/ParameterSet/interface/Registry.h"
 
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+
 const static std::vector<std::string> interestingTriggers = {
     "HLT_IsoMu24_eta2p1",
     "HLT_IsoMu24",
@@ -234,6 +236,10 @@ private:
   bool value_jet_puid[max_jet];
   float value_jet_btag[max_jet];
 
+  //Pileup
+  int value_total_pu;
+  int value_true_pu;
+
   // Generator particles
   const static int max_gen = 1000;
   UInt_t value_gen_n;
@@ -357,7 +363,15 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Jet_puId", value_jet_puid, "Jet_puId[nJet]/O");
   tree->Branch("Jet_btag", value_jet_btag, "Jet_btag[nJet]/F");
 
-  // Generator particles
+
+  // Pileup
+  if (!isData) {
+    tree->Branch("Pileup_total_number", &value_total_pu, "Pileup_total_number/i");
+    tree->Branch("Pileup_true_number", &value_true_pu, "Pileup_true_number/i");
+  }
+
+
+  // Generator particles and pileup
   if (!isData) {
     tree->Branch("nGenPart", &value_gen_n, "nGenPart/i");
     tree->Branch("GenPart_pt", value_gen_pt, "GenPart_pt[nGenPart]/F");
@@ -634,6 +648,25 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
       value_jet_btag[value_jet_n] = btags->operator[](it - jets->begin()).second;
       value_jet_n++;
+    }
+  }
+
+  // Pileup
+  if (!isData) {
+    Handle<std::vector<PileupSummaryInfo>> puInfo;
+    iEvent.getByLabel(InputTag("addPileupInfo"), puInfo);
+
+    value_total_pu = 0;
+    value_true_pu = 0;
+    for (unsigned i = 0; i < (puInfo->size()); ++i) {
+        const PileupSummaryInfo &Info = (*puInfo)[i];
+        int bx = Info.getBunchCrossing();
+        
+        if (bx == 0) {
+			value_total_pu = Info.getPU_NumInteractions();
+            value_true_pu = Info.getTrueNumInteractions();
+			continue;
+		}
     }
   }
 
