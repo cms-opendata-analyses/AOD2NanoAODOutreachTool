@@ -114,7 +114,7 @@ int findBestMatch(T& gens, reco::Candidate::LorentzVector& p4) {
 
 class AOD2NanoAOD : public edm::EDAnalyzer {
 public:
-  explicit AOD2NanoAOD(const edm::ParameterSet &);
+ explicit AOD2NanoAOD(const edm::ParameterSet &);
   ~AOD2NanoAOD();
 
 private:
@@ -261,16 +261,6 @@ private:
   bool value_jet_puid[max_jet];
   float value_jet_btag[max_jet];
 
-  // Corrected + Smeared Jets                                                                                                                             
-  const static int max_corr_jet = 1000;
-  UInt_t value_corr_jet_n;
-  float value_corr_jet_pt[max_jet];
-  float value_corr_jet_eta[max_jet];
-  float value_corr_jet_phi[max_jet];
-  float value_corr_jet_mass[max_jet];
-  bool value_corr_jet_puid[max_jet];
-  float value_corr_jet_btag[max_jet];
-
   // Generator particles
   const static int max_gen = 1000;
   UInt_t value_gen_n;
@@ -401,15 +391,6 @@ AOD2NanoAOD::AOD2NanoAOD(const edm::ParameterSet &iConfig)
   tree->Branch("Jet_mass", value_jet_mass, "Jet_mass[nJet]/F");
   tree->Branch("Jet_puId", value_jet_puid, "Jet_puId[nJet]/O");
   tree->Branch("Jet_btag", value_jet_btag, "Jet_btag[nJet]/F");
-
-  // Corrected Jets                                                                                                                                       
-  tree->Branch("nCorrJet", &value_jet_n, "ncJet/i");
-  tree->Branch("CorrJet_pt", value_jet_pt, "cJet_pt[nJet]/F");
-  tree->Branch("CorrJet_eta", value_jet_eta, "cJet_eta[nJet]/F");
-  tree->Branch("CorrJet_phi", value_jet_phi, "cJet_phi[nJet]/F");
-  tree->Branch("CorrJet_mass", value_jet_mass, "cJet_mass[nJet]/F");
-  tree->Branch("CorrJet_puId", value_jet_puid, "cJet_puId[nJet]/O");
-  tree->Branch("CorrJet_btag", value_jet_btag, "cJet_btag[nJet]/F");
 
   // Generator particles
   if (!isData) {
@@ -856,28 +837,6 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       //value_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
       value_jet_btag[value_jet_n] = btags->operator[](it - jets->begin()).second;
       value_jet_n++;
-    }
-  }
-
-  // Corrected Jets
-  Handle<PFJetCollection> corr_jets;
-  iEvent.getByLabel(InputTag("ak5PFCorrectedJetsSmeared"), corr_jets);
-  //Handle<JetTagCollection> btags;
-  //iEvent.getByLabel(InputTag("combinedSecondaryVertexBJetTags"), btags);
-
-  //const float jet_min_pt = 15;
-  value_corr_jet_n = 0;
-  std::vector<PFJet> selectedCorrJets;
-  for (auto it = corr_jets->begin(); it != corr_jets->end(); it++) {
-    if (it->pt() > jet_min_pt) {
-      selectedCorrJets.emplace_back(*it);
-      value_corr_jet_pt[value_jet_n] = it->pt();
-      value_corr_jet_eta[value_jet_n] = it->eta();
-      value_corr_jet_phi[value_jet_n] = it->phi();
-      value_corr_jet_mass[value_jet_n] = it->mass();
-      //value_corr_jet_puid[value_jet_n] = it->emEnergyFraction() > 0.01 && it->n90() > 1;
-      value_corr_jet_btag[value_jet_n] = btags->operator[](it - jets->begin()).second;
-      value_corr_jet_n++;
     }
   }
 
