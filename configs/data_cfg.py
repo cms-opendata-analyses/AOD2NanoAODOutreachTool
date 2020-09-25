@@ -31,7 +31,25 @@ process.source = cms.Source(
 
 # Set global tag
 # We don't have set the global tag for the educational samples. This simplifies running the code since we don't have to access the database.
-#process.GlobalTag.globaltag = "FT_R_53_V18::All"
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = "FT_R_53_V18::All"
+
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.load('RecoJets.Configuration.RecoPFJets_cff')
+process.ak5PFJets.doAreaFastjet = True
+
+process.ak5PFchsCorrectedJets = cms.EDProducer('CorrectedPFJetProducer',
+        src = cms.InputTag("ak5CaloJets"),
+        correctors  = cms.VInputTag('ak5PFCHSL1FastL2L3Corrector')
+        )
+
+process.ak5PFchsCorrectedJetsSmeared = cms.EDProducer('SmearedPFJetProducer',
+        src = cms.InputTag('ak5PFchsCorrectedJets'),
+        enabled = cms.bool(True),
+        rho = cms.InputTag("fixedGridRhoFastjetAll"),
+        algo = cms.string('AK5PFchs'),
+        algopt = cms.string('AK5PFchs_pt')
+        )
 
 # Apply JSON file with lumi mask (needs to be done after the process.source definition)
 goodJSON = "data/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
