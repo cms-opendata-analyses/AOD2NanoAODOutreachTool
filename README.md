@@ -27,7 +27,7 @@ cd CMSSW_5_3_32/src
 cmsenv
 mkdir workspace
 cd workspace
-git clone git://github.com/cms-opendata-analyses/AOD2NanoAODOutreachTool -b v1.2 AOD2NanoAOD
+git clone git://github.com/cms-opendata-analyses/AOD2NanoAODOutreachTool -b devworkshop AOD2NanoAOD
 cd AOD2NanoAOD
 scram b -j8
 ```
