@@ -756,49 +756,36 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       double corrPFCHIso = max(it->chargedHadronIso() - rhoIso * CH_AEff, 0.);
       double corrPFNHIso = max(it->neutralHadronIso() - rhoIso * NH_AEff, 0.);
       double corrPFPhIso = max(it->photonIso() - rhoIso * Ph_AEff, 0.);
+      value_ph_isTight[value_ph_n] = false;
+      value_ph_isMedium[value_ph_n] = false;
+      value_ph_isLoose[value_ph_n] = false;
       if ( it->eta() <= 1.479 ){
-	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.011 && corrPFCHIso<.7 && corrPFNHIso<(.4+.04*it->pt())
-	     && corrPFPhIso<(.5+.005*it->pt()) && passelectronveto==true) {
-	  value_ph_isTight[value_el_n] = true;
-	  value_ph_isMedium[value_el_n] = false;
-	  value_ph_isLoose[value_el_n] = false;
-	}	    
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.011 && corrPFCHIso<1.5 && corrPFNHIso<(1.0+.04*it->pt())
-		  && corrPFPhIso<(.7+.005*it->pt()) && passelectronveto==true) {
-	  value_ph_isTight[value_el_n] = false;
-	  value_ph_isMedium[value_el_n] = true;
-	  value_ph_isLoose[value_el_n] = false;
-	}
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.012 && corrPFCHIso<2.6 && corrPFNHIso<(3.5+.04*it->pt())
-                  && corrPFPhIso<(1.3+.005*it->pt()) && passelectronveto==true) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = true;
+	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.012 && 
+	     corrPFCHIso<2.6 && corrPFNHIso<(3.5+.04*it->pt()) && 
+	     corrPFPhIso<(1.3+.005*it->pt()) && passelectronveto==true) {
+          value_ph_isLoose[value_ph_n] = true;
+
+	  if ( it->sigmaIetaIeta()<.011 && corrPFCHIso<1.5 && corrPFNHIso<(1.0+.04*it->pt()) && corrPFPhIso<(.7+.005*it->pt())){
+	    value_ph_isMedium[value_ph_n] = true;
+
+	    if ( corrPFCHIso<.7 && corrPFNHIso<(.4+.04*it->pt()) && corrPFPhIso<(.5+0.005*it->pt()) ){
+	      value_ph_isTight[value_ph_n] = true;
+	    }
+	  }
 	}
       }
       else if ( it->eta() > 1.479 && it->eta() < 2.5 ) {
-	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.031 && corrPFCHIso<.5 && corrPFNHIso<(1.5+.04*it->pt())
-             && corrPFPhIso<(1.0+.005*it->pt()) && passelectronveto==true) {
-	  value_ph_isTight[value_el_n] = true;
-	  value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = false;
-        }
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.033 && corrPFCHIso<1.2 && corrPFNHIso<(1.5+.04*it->pt())
-                  && corrPFPhIso<(1.0+.005*it->pt()) && passelectronveto==true) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = true;
-          value_ph_isLoose[value_el_n] = false;
+	if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.034 && corrPFCHIso<2.3 && corrPFNHIso<(2.9+.04*it->pt()) && passelectronveto==true ){
+          value_ph_isLoose[value_ph_n] = true;
+	  
+	  if ( it->sigmaIetaIeta()<.033 && corrPFCHIso<1.2 && corrPFNHIso<(1.5+.04*it->pt()) && corrPFPhIso<(1.0+.005*it->pt())) {
+	    value_ph_isMedium[value_ph_n] = true;
+
+	    if ( it->sigmaIetaIeta()<0.031 && corrPFCHIso<0.5){
+	      value_ph_isTight[value_ph_n] = true;
+	    }
+	  }
 	}
-	else if ( it->hadTowOverEm()<.05 && it->sigmaIetaIeta()<.034 && corrPFCHIso<2.3 && corrPFNHIso<(2.9+.04*it->pt()) && passelectronveto==true) {
-          value_ph_isTight[value_el_n] = false;
-          value_ph_isMedium[value_el_n] = false;
-          value_ph_isLoose[value_el_n] = true;
-	}
-      }
-      else {
-	value_ph_isTight[value_el_n] = false;
-	value_ph_isMedium[value_el_n] = false;
-	value_ph_isLoose[value_el_n] = false;
       }
       value_ph_n++;
     }
