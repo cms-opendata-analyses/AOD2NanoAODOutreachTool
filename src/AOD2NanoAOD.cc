@@ -568,55 +568,44 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
       value_el_dzErr[value_el_n] = trk->dzError();
       value_el_jetidx[value_el_n] = -1;
       value_el_genpartidx[value_el_n] = -1;
-      if ( abs(it->eta()) <= 1.479 ) {
-	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.01 &&
-             it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=0 && pfIso<.10 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-	  value_el_isTight[value_el_n] = true;
-	  value_el_isMedium[value_el_n] = false;
-	  value_el_isLoose[value_el_n] = false;
-	}
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.06 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=1 &&  pfIso<.15 &&
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05  && passelectronveto==true) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = true;
-          value_el_isLoose[value_el_n] = false;
-        }
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && it->sigmaIetaIeta()<.01 &&
-		  it->hadronicOverEm()<.12 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && missing_hits<=1 &&  pfIso<.15 &&
-		  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-	  value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
+	    
+      value_el_isTight[value_el_n] = false;
+      value_el_isMedium[value_el_n] = false;
+      value_el_isLoose[value_el_n] = false;
+      if ( abs(it->eta()) <= 1.479 ) {   
+	if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.15 && 
+	     it->sigmaIetaIeta()<.01 && it->hadronicOverEm()<.12 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	     missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
+	     abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 ) {
+
           value_el_isLoose[value_el_n] = true;
+		
+	  if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.004 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.06 && abs(trk->dz(pv))<.1 ){
+	    value_el_isMedium[value_el_n] = true;
+		  
+	    if (abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && missing_hits<=0 && pfIso<.10 ){
+	      value_el_isTight[value_el_n] = true;
+	    }
+	  }
 	}
       }
       else if ( abs(it->eta()) > 1.479 && abs(it->eta()) < 2.5 ) {
-        if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.02 && it->sigmaIetaIeta()<.03 &&
-             it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=0 && pfIso<.10 &&
-             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-          value_el_isTight[value_el_n] = true;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = false;
-        }
-	else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.10 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.1 && missing_hits<=1 && pfIso<.15 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = true;
-          value_el_isLoose[value_el_n] = false;
-        }
-        else if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.1 && it->sigmaIetaIeta()<.03 &&
-                  it->hadronicOverEm()<.1 && abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && missing_hits<=1 && pfIso<.15 &&
-                  abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05 && passelectronveto==true) {
-          value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
+        if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.009 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.1 && 
+	     it->sigmaIetaIeta()<.03 && it->hadronicOverEm()<.1 && 
+	     abs(trk->dxy(pv))<.02 && abs(trk->dz(pv))<.2 && 
+	     missing_hits<=1 && pfIso<.15 && passelectronveto==true &&
+             abs(1/it->ecalEnergy()-1/(it->ecalEnergy()/it->eSuperClusterOverP()))<.05) {
+
           value_el_isLoose[value_el_n] = true;
-        }
-	else {
-	  value_el_isTight[value_el_n] = false;
-          value_el_isMedium[value_el_n] = false;
-          value_el_isLoose[value_el_n] = false;
+		
+	  if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.007 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.03 && abs(trk->dz(pv))<.1 ){
+	    value_el_isMedium[value_el_n] = true;
+		  
+	    if ( abs(it->deltaEtaSuperClusterTrackAtVtx())<.005 && abs(it->deltaPhiSuperClusterTrackAtVtx())<.02 && missing_hits<=0 && pfIso<.10 ){
+	      value_el_isTight[value_el_n] = true;
+	    }
+	  }
         }
       }
       value_el_n++;
