@@ -526,7 +526,8 @@ void AOD2NanoAOD::analyze(const edm::Event &iEvent,
   Handle<PFTauDiscriminator> tausLooseIso, tausVLooseIso, tausMediumIso, tausTightIso,
                              tausDecayMode, tausLooseEleRej, tausMediumEleRej,
                              tausTightEleRej, tausLooseMuonRej, tausMediumMuonRej,
-                             tausTightMuonRej, tausRawIso, tausLooseIsoMVA, tausMediumIsoMVA, tausTightIsoMVA;
+                             tausTightMuonRej, tausRawIso, tausLooseIsoMVA, tausMediumIsoMVA, tausTightIsoMVA,
+                             tausLooseIso3Hits, tausMediumIso3Hitsi, tausTightIso3Hits;
 
   iEvent.getByLabel(InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
           tausDecayMode);
