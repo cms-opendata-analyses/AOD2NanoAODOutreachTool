@@ -9,8 +9,10 @@ jobs:
     name: AOD2NanoAOD test - minikube + argo
     steps:
     - uses: actions/checkout@v2
-    - name: Start minikube
-      uses: medyagh/setup-minikube@master
+    - name: Start a minikube cluster
+      run: |
+        minikube start
+        n=0; until ((n >= 60)); do kubectl -n default get serviceaccount default -o name && break; n=$((n + 1)); sleep 1; done; ((n < 60))
     - name: Set up persistent volume and storage pod
       run: |
         kubectl apply -f volumes.yaml   
@@ -18,9 +20,10 @@ jobs:
       run: |
         kubectl create ns argo
         kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/quick-start-postgres.yaml
-        curl -sLO https://github.com/argoproj/argo/releases/download/v2.10.0-rc3/argo-linux-amd64
+        curl -sLO https://github.com/argoproj/argo/releases/download/v3.0.0-rc6/argo-linux-amd64.gz
+        gunzip argo-linux-amd64.gz
         chmod +x argo-linux-amd64 
-        mv ./argo-linux-amd64 $HOME/bin/argo
+        sudo mv ./argo-linux-amd64 /usr/local/bin/argo
         argo version
     - name: Submit the argo test workflow
       run: |
