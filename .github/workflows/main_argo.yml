@@ -19,8 +19,8 @@ jobs:
     - name: Set up argo
       run: |
         kubectl create ns argo
-        kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/quick-start-postgres.yaml
-        curl -sLO https://github.com/argoproj/argo/releases/download/v3.0.0-rc6/argo-linux-amd64.gz
+        kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo-workflows/stable/manifests/quick-start-postgres.yaml
+        curl -sLO https://github.com/argoproj/argo-workflows/releases/download/v3.1.1/argo-linux-amd64.gz
         gunzip argo-linux-amd64.gz
         chmod +x argo-linux-amd64 
         sudo mv ./argo-linux-amd64 /usr/local/bin/argo
