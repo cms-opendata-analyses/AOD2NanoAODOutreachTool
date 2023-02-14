@@ -1,0 +1,33 @@
+inputs:
+  files:
+    - BuildFile.xml
+
+  directories:
+    - src
+    - data
+    - python
+    - configs
+
+workflow:
+  type: serial
+  specification:
+    steps:
+      - name: test
+        environment: cmsopendata/cmssw_5_3_32
+        commands:
+          - >
+              source /opt/cms/cmsset_default.sh
+              && scramv1 project CMSSW CMSSW_5_3_32
+              && cd CMSSW_5_3_32/src
+              && eval `scramv1 runtime -sh`
+              && mkdir workspace
+              && cd workspace
+              && mkdir AOD2NanoAOD
+              && cd AOD2NanoAOD
+              && cp -r ../../../../src ../../../../data ../../../../python ../../../../BuildFile.xml ../../../../configs .
+              && scram b
+              && cmsRun configs/data_cfg.py
+
+outputs:
+  files:
+    - CMSSW_5_3_32/src/workspace/AOD2NanoAOD/output.root
