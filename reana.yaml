@@ -12,7 +12,7 @@ workflow:
   type: serial
   specification:
     steps:
-      - name: test
+      - name: test-data-production
         environment: cmsopendata/cmssw_5_3_32
         commands:
           - >
@@ -27,6 +27,10 @@ workflow:
               && cp -r ../../../../src ../../../../data ../../../../python ../../../../BuildFile.xml ../../../../configs .
               && scram b
               && cmsRun configs/data_cfg.py
+
+workspace:
+  retention_days:
+    CMSSW_5_3_32: 7
 
 outputs:
   files:
